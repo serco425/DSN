@@ -5,8 +5,8 @@ function [epoch_based_accuracy_det, epoch_based_accuracy_stoch, accuracy_stoch, 
 %    x1---w1---->| |
 %    b----w3---->| |-------->out
 %    x2---w2---->| |
-%                 -
-%            single layer
+%                 - 
+%            single layer 
 %
 %The code implemented by Sercan AYGÜN (ayguns@itu.edu.tr)
 %during the research on ICTEAM, UCLouvain
@@ -29,53 +29,29 @@ input_stream_selection = RNG_unipolar(package_size/2, package_size);
 %Do-it-all in the loop, in an amount of learning iteration
 for i = 1:learning_iteration
    for j = 1:number_of_possible_in %possible input trials
-      
+       
       % single layer multiply and sum ----> is STOCHASTIC
       % x1*w1 + x2*w2 + b*w3         
       % layer1_temp = input(j,1)*weights(1,1) + input(j,2)*weights(2,1) + bias*weights(3,1)
       % bias = 1    
       % ---> was like in conventional code
       
-      rng_1 = RNG_bipolar(input(j,1), package_size);
-      %sum_rng_1 = sum(rng_1);
-      %stn_rng_1 = STN_bipolar(rng_1, package_size);
-      
-      rng_2 = RNG_bipolar((weights(1,1)), package_size);
-      %sum_rng_2 = sum(rng_2);
-      %stn_rng_2 = STN_bipolar(rng_2, package_size);
-      
-      and_1 = ANDing(rng_1, rng_2);
-      %sum_and_1 = sum(and_1);    
-      %stn_and_1 = STN_bipolar(and_1, package_size);
+      rng_1 = RNG_bipolar(input(j,1), package_size);      
+      rng_2 = RNG_bipolar((weights(1,1)), package_size);  
+      xnor_1 = XNORing(rng_1, rng_2);
       
       rng_3 = RNG_bipolar(input(j,2), package_size);
-      %sum_rng_3 = sum(rng_3);
-      %stn_rng_3 = STN_bipolar(rng_3, package_size);
+      rng_4 = RNG_bipolar((weights(2,1)), package_size);      
+      xnor_2 = XNORing(rng_3, rng_4);
       
-      rng_4 = RNG_bipolar((weights(2,1)), package_size);
-      %sum_rng_4 = sum(rng_4);
-      %stn_rng_4 = STN_bipolar(rng_4, package_size);
-      
-      and_2 = ANDing(rng_3, rng_4);
-      %sum_and_2 = sum(and_2);  
-      %stn_and_2 = STN_bipolar(and_2, package_size);
-      
-      rng_5 = RNG_bipolar((weights(3,1)), package_size);
-      %sum_rng_4 = sum(rng_4);
-      %stn_rng_5 = STN_bipolar(rng_5, package_size);
-      
+      rng_5 = RNG_bipolar((weights(3,1)), package_size);     
       rng_6 = RNG_bipolar(1, package_size);
-      %sum_rng_6 = sum(rng_6);
-      %stn_rng_6 = STN_bipolar(rng_6, package_size);
+      xnor_3 = XNORing(rng_5, rng_6);
       
-      and_3 = ANDing(rng_5, rng_6);
-      %sum_and_3 = sum(and_3);  
-      %stn_and_3 = STN_bipolar(and_3, package_size);
+      layer1_stream = mux2_to_1_adder(input_stream_selection, xnor_1, xnor_2);
+      layer1_stream = mux2_to_1_adder(input_stream_selection, layer1_stream, xnor_3);
       
-      layer1_stream = mux2_to_1_adder(input_stream_selection, and_1, and_2);
-      layer1_stream = mux2_to_1_adder(input_stream_selection, layer1_stream, and_3);
-      
-      layer1_temp = STN_bipolar(layer1_stream, package_size);
+      layer1_temp = STN_bipolar(layer1_stream, package_size); % From Bipolar Encoded SC data To Number Scalar
       actual_output(j) = tanh(layer1_temp);
       
       %Deviation from the expected value
@@ -86,13 +62,11 @@ for i = 1:learning_iteration
       weights(1,1) = weights(1,1) + learning_rate*input(j,1)*actual_minus_expected(j)*(1-((tanh(layer1_temp))*(tanh(layer1_temp))));
       weights(2,1) = weights(2,1) + learning_rate*input(j,2)*actual_minus_expected(j)*(1-((tanh(layer1_temp))*(tanh(layer1_temp))));      
       weights(3,1) = weights(3,1) + learning_rate*      1   *actual_minus_expected(j)*(1-((tanh(layer1_temp))*(tanh(layer1_temp))));           
-    
-      
+          
       weights_control_1(j, i) = weights(1,1);
       weights_control_2(j, i) = weights(2,1);
       weights_control_3(j, i) = weights(3,1);
-      
-   
+         
    end %end of the one epoch
    
    % Deterministic test
