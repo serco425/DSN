@@ -5,8 +5,8 @@ function [epoch_based_accuracy_det, epoch_based_accuracy_stoch, accuracy_stoch, 
 %    x1---w1---->| |
 %    b----w3---->| |-------->out
 %    x2---w2---->| |
-%                 -
-%            single layer
+%                 - 
+%            single layer 
 %
 %The code implemented by Sercan AYGÜN (ayguns@itu.edu.tr)
 %during the research on ICTEAM, UCLouvain
@@ -29,7 +29,7 @@ input_stream_selection = RNG_unipolar(package_size/2, package_size);
 %Do-it-all in the loop, in an amount of learning iteration
 for i = 1:learning_iteration
    for j = 1:number_of_possible_in %possible input trials
-      
+       
       % single layer multiply and sum ----> is STOCHASTIC
       % x1*w1 + x2*w2 + b*w3         
       % layer1_temp = input(j,1)*weights(1,1) + input(j,2)*weights(2,1) + bias*weights(3,1)
